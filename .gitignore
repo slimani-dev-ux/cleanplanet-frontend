@@ -1,0 +1,40 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# --- Dépendances (monorepo)
+node_modules/
+**/node_modules/
+
+# --- Builds / artefacts
+build/
+dist/
+**/build/
+**/dist/
+.cache/
+*.log
+
+# --- Env & secrets
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Uploads (ne pas versionner les fichiers uploadés)
+backend/uploads/
+frontend/uploads/
+
+# Option si tu veux garder le dossier vide dans le repo :
+#   crée backend/uploads/.gitkeep puis laisse la règle ci-dessus
+
+# --- Tests / couverture
+coverage/
+**/coverage/
+
+# --- OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

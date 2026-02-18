@@ -1,0 +1,779 @@
+/* ==============================================================
+   CleanPlanet — global.css (rem + em)
+   Approche : mobile-first
+   Paliers : ≤23.4375em (≤375px), ≥48em (≥768px), ≥80em (≥1280px)
+   ============================================================== */
+
+/* ================
+   1) BASE & RESET
+   ================ */
+* {
+  box-sizing: border-box;
+}
+html {
+  font-size: 62.5%;
+}
+body {
+  font-size: 1.6rem;
+  font-family: 'Roboto', sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+}
+main {
+  background: #f4f4f4;
+  padding: 1rem 0;
+}
+
+/* ===============================
+   2) ACCESSIBILITÉ & UTILITAIRES
+   =============================== */
+:focus-visible {
+  outline: 2px solid #0af; /* px OK pour outline */
+  outline-offset: 2px;
+}
+:where(input, select, textarea):focus-visible {
+  border-color: #0af;
+  box-shadow: 0 0 0.3rem rgba(0, 170, 255, 0.15);
+}
+
+/* Gabarit des formulaires */
+form,
+form button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Icônes & spinner */
+.icon {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.2em;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Boutons génériques */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.8rem;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #0af;
+  color: #fff;
+  font-weight: 600;
+  border: 0;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Texte pour lecteurs d’écran */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Messages de statut (succès/erreur), réutilisables */
+.form-status {
+  display: block;
+  min-height: 1.8rem;
+  margin-top: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+.form-status--success {
+  color: #0a7f2e;
+}
+.form-status--error {
+  color: #b00020;
+}
+
+/* ==========================
+   3) SECTION ACCUEIL / HERO
+   ========================== */
+.home {
+  background: #036;
+  min-height: 100vh;
+  color: #fff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-x: hidden;
+}
+.overlay {
+  background: #00000080;
+  padding: 2rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn 1.2s ease-in;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.intro h1 {
+  font-size: 1.5em;
+  margin-bottom: 1rem;
+}
+.slogan {
+  font-size: 1.4em;
+  margin-bottom: 2rem;
+  font-style: italic;
+  color: #d0f0ff;
+}
+.intro p {
+  font-size: 1.2em;
+  margin: 0 auto 2rem;
+  text-align: center;
+  max-width: 80rem;
+}
+
+/* ==========================
+   4) BOUTON PRINCIPAL (CTA)
+   ========================== */
+.cta-button {
+  padding: 1.2rem 2.4rem;
+  font-size: 1.5rem;
+  background: #0af;
+  color: #fff;
+  border: none;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.cta-button:hover {
+  background: #0077cc;
+}
+
+/* ============================================
+   5) EN-TÊTE & NAVIGATION (MOBILE PAR DÉFAUT)
+   ============================================ */
+.header {
+  background-image: url('../assets/globe-bg.avif');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  background-color: #02003f;
+  min-height: 14rem;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header-overlay {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: 1.2rem;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.logo img {
+  height: 3.5rem;
+  width: auto;
+  border-radius: 0.8rem;
+}
+.logo span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-links {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  font-size: 1.8rem;
+}
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 1rem 1.2rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.011);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.nav-links a:hover {
+  color: #90ee90;
+  background: transparent;
+  text-decoration: underline;
+}
+
+/* ===============================
+   6) PAGES / FORMULAIRES / LISTES
+   =============================== */
+
+/* Articles */
+.articles-section .articles-list,
+.member-profile-section .articles-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4.2rem;
+}
+.articles-section,
+.modify-article {
+  padding-right: 2.3rem;
+}
+.articles-section h2 {
+  margin-left: 2.3rem;
+}
+.articles-section .articles-list {
+  margin-bottom: 2rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.articles-section button {
+  margin: 2rem 0 0 2rem;
+}
+.articles-section p {
+  margin-bottom: 1rem;
+  white-space: pre-line;
+  text-align: justify;
+}
+
+.articles-section .articles-list:only-child,
+.articles-section .articles-list:has(> :only-child) {
+  justify-content: center;
+  grid-template-columns: 1fr;
+}
+
+/* Profils */
+.member-profile-section p,
+.member-profile-section h4,
+.user-profile-section p,
+.admin-profile-section p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.user-profile-section,
+.admin-profile-section,
+.member-profile-section {
+  padding: 2rem;
+}
+.admin-profile-section .section-divider {
+  margin: 2rem 0;
+}
+
+.user-profile-section .actions-list,
+.member-profile-section .actions-list,
+.admin-profile-section .actions-list {
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.user-profile-section .actions-item,
+.member-profile-section .actions-item,
+.admin-profile-section .actions-item {
+  margin-top: 2rem;
+}
+.member-profile-section .articles-list,
+.modify-article {
+  padding-left: 1.5rem;
+}
+.member-profile-section .articles-list:has(> :only-child) {
+  justify-content: center;
+  grid-template-columns: 1fr;
+}
+.member-profile-section .item-actions button {
+  margin-bottom: 1rem;
+}
+
+.modify-article button {
+  width: 50%;
+  margin-top: 1rem;
+  padding: 1rem 1.6rem;
+}
+.primary-cta {
+  margin-top: 1rem;
+}
+.retour-profil-btn {
+  background-color: #1f2937;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bolder;
+  margin: 2rem 0 0 2rem;
+}
+
+.retour-profil-btn:hover {
+  background-color: #0000ff;
+}
+
+.retour-profil-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Outils admin */
+.tools-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.tools-item:hover .button-link {
+  background: #06d139;
+  color: #fff;
+  cursor: pointer;
+}
+.button-link {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.6rem;
+  background: #eee;
+  text-decoration: none;
+  color: inherit;
+}
+.button-link:hover {
+  text-decoration: none;
+}
+
+/* Listes génériques */
+.users-section,
+.members-section,
+.organisations-section {
+  padding: 2rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.users-section .users-item,
+.members-section .members-item,
+.organisations-section .organisations-item {
+  margin-bottom: 1.5rem;
+}
+.users-item button,
+.members-item button,
+.organisations-item button {
+  margin-left: 1rem;
+}
+
+/* Ajout d’article (membre) */
+.add-article {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.article-title,
+.article-description {
+  display: block;
+  width: 100%;
+  margin: 0.8rem 0;
+  padding: 0.8rem 0;
+}
+.article-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 0.6rem;
+}
+.article-submit {
+  margin-top: 1rem;
+  padding: 0.8rem 1.6rem;
+}
+.article-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Commentaires */
+.no-comments,
+.with-comments {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+.with-comments li {
+  padding: 0.5rem 0;
+  font-size: 1.5rem;
+}
+.no-comments {
+  font-style: italic;
+  color: gray;
+}
+
+form.comment-form,
+.form-modify-art {
+  display: grid;
+  gap: 2rem;
+}
+.comment-textarea {
+  display: block;
+  width: 100%;
+  min-height: 10rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.6rem;
+  background: #fff;
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+/* Supprimer */
+.remove:hover {
+  color: red;
+  font-weight: bold;
+}
+
+/* ====== Ajouter une organisation ====== */
+.add-an-organization {
+  padding: 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.add-an-organization h2 {
+  margin: 1.5rem 0 1.2rem 0;
+}
+
+/* message de statut stable (évite le “saut”) */
+.add-an-organization .form-status {
+  display: block;
+  min-height: 1.8rem;
+  margin: 0.4rem 0 1.2rem;
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+/* form layout */
+.add-an-organization .org-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.add-an-organization .fieldset {
+  border: 1px solid #cfd8dc;
+  border-radius: 0.8rem;
+  padding: 1.6rem;
+}
+
+/* chaque champ sur sa propre ligne en mobile */
+.add-an-organization .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* labels lisibles (évite le chevauchement avec les inputs) */
+.add-an-organization label {
+  display: block;
+  font-weight: 600;
+}
+
+/* champs */
+.add-an-organization input[type='text'],
+.modify-article input[type='text'] {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.6rem;
+  background: #fff;
+  font: inherit;
+}
+
+/* bouton */
+.add-an-organization .btn-primary {
+  align-self: start;
+}
+
+/* =========================
+   7) PIED DE PAGE (FOOTER)
+   ========================= */
+.footer {
+  background: #036;
+  color: #fff;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Stabilise la hauteur du bloc contact pour éviter les variations */
+.contact-form {
+  min-height: 24rem;
+  flex: 1;
+  min-width: 25rem;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: none;
+}
+.contact-form button {
+  padding: 1rem 2rem;
+  background: #0af;
+  border: none;
+  color: #fff;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* --- Réseaux sociaux : couleur & accessibilité --- */
+.social-icons {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 1.5em;
+  margin-top: 3rem;
+}
+.social-icons a i {
+  transition: opacity 0.3s ease;
+}
+.social-icons a:nth-child(1) i {
+  color: #1da1f2;
+} /* Twitter */
+.social-icons a:nth-child(2) i {
+  color: #1877f2;
+} /* Facebook */
+.social-icons a:nth-child(3) i {
+  color: #e1306c;
+} /* Instagram */
+.social-icons a:hover i {
+  opacity: 0.7;
+}
+
+/* =========================================
+   8) PAGES D’AUTH (inscription / connexion)
+   ========================================= */
+:is(
+    .register-page,
+    .login-page,
+    .user-login,
+    .modify-user-profil,
+    .member-login,
+    .modify-member-profil
+  ) {
+  max-width: 72rem;
+  margin: 3rem auto;
+  padding: 1.6rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.06);
+}
+:is(
+    .register-page,
+    .login-page,
+    .user-login,
+    .member-login,
+    .modify-user-profil,
+    .modify-member-profil,
+    .modify-organization
+  )
+  form {
+  display: grid;
+  gap: 1.2rem;
+  margin-bottom: 2.4rem;
+}
+:is(
+    .register-page,
+    .login-page,
+    .user-login,
+    .member-login,
+    .modify-user-profil,
+    .modify-member-profil,
+    .modify-organization
+  )
+  :is(input, select, button) {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.8rem;
+  background: #fff;
+  font: inherit;
+}
+:is(
+    .register-page,
+    .login-page,
+    .user-login,
+    .member-login,
+    .modify-user-profil,
+    .modify-member-profil,
+    .modify-organization
+  )
+  button {
+  background: #0af;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+:is(.register-page, .member-login) button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.isAdmin form {
+  width: 100%;
+}
+
+/* =================
+   9) MEDIA QUERIES
+   ================= */
+
+/* Small phones (≤375px) */
+@media (max-width: 23.4375em) {
+  .nav-links a {
+    padding: 0.5rem;
+  }
+  .slogan {
+    font-size: 1.2em;
+  }
+  .intro p {
+    font-size: 1em;
+  }
+  h2 {
+    font-size: 1.3em;
+    margin-left: 1rem;
+  }
+  h3 {
+    font-size: 1em;
+  }
+  .contact-form {
+    min-width: 5rem;
+  }
+}
+
+/* Tablette (≥768px) */
+@media (min-width: 48em) {
+  .header {
+    min-height: 18rem;
+    padding: 1.6rem 1rem;
+  }
+  .header-overlay {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    padding: 1.6rem 1rem;
+  }
+  .logo img {
+    height: 4.2rem;
+  }
+  .logo span {
+    font-size: 3.5rem;
+  }
+  .nav-links {
+    flex-direction: row;
+    gap: 1.6rem;
+    margin-top: 0;
+    width: auto;
+  }
+
+  .nav-links a {
+    padding: 0.8rem 0;
+    font-size: 2.125rem;
+  }
+  .intro h1 {
+    font-size: 2.5em;
+  }
+  /* form button {
+    width: auto;
+    margin: 0.5rem;
+  } */
+
+  .articles-section .articles-list,
+  .member-profile-section .articles-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .add-an-organization .fieldset {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem 2rem;
+  }
+  /* nom + adresse sur toute la largeur */
+  .add-an-organization .form-row--full {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Desktop (≥1280px) */
+@media (min-width: 80em) {
+  .header {
+    min-height: 22rem;
+    padding: 2rem;
+  }
+  .logo img {
+    height: 6rem;
+  }
+  .logo span {
+    font-size: 4.5rem;
+  }
+  .nav-links {
+    gap: 2rem;
+  }
+  .articles-section .articles-list,
+  .member-profile-section .articles-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* =========================
+   10) RÉDUCTION ANIMATIONS
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}
