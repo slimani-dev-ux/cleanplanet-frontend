@@ -24,6 +24,7 @@ export default function AjouterArticle() {
   const onSubmit = async e => {
     e.preventDefault();
     if (submitting) return;
+
     setSubmitting(true);
     setMessage('');
     setTitleError('');
@@ -32,22 +33,29 @@ export default function AjouterArticle() {
     // 1) Validation côté client (mêmes règles que le contrôleur)
     const t = normalizeTitle(title);
     const d = normalizeDescription(description);
+
     if (!t || !hasMeaningfulChars(t)) {
       setMessage('Titre requis (au moins un caractère alphanumérique).');
       setSubmitting(false);
       return;
     }
+
     if (!d || d.replace(/\s/g, '').length < 5 || !hasMeaningfulChars(d)) {
       setMessage('Description requise (≥ 5 caractères).');
       setSubmitting(false);
       return;
     }
+
     try {
       const formData = new FormData();
+
       // 2) On envoie les valeurs normalisées
       formData.append('title', t);
       formData.append('description', d);
-      if (image) formData.append('image', image);
+
+      if (image) {
+        formData.append('image', image);
+      }
 
       // POST /api/articles — cookie httpOnly via withCredentials=true (défini dans api)
       await api.post('/articles', formData, {
@@ -61,7 +69,8 @@ export default function AjouterArticle() {
       try {
         const { data: me } = await api.get('/auth/me', {
           validateStatus: s => (s >= 200 && s < 300) || s === 401,
-        }); // { role, ... }
+        });
+
         const role = String(me?.role || '').toLowerCase();
 
         if (role === 'member') {
@@ -69,11 +78,11 @@ export default function AjouterArticle() {
         } else if (role === 'admin') {
           navigate('/admin/liste-articles', { replace: true });
         } else {
-          // (cas improbable ici)
+          // cas improbable ici
           navigate('/', { replace: true });
         }
       } catch {
-        // si /auth/me échoue, on tente la destination membre (composant protégé renverra vers login si besoin)
+        // si /auth/me échoue, on tente la destination membre
         navigate('/profil-membre', { replace: true });
       }
 
@@ -83,15 +92,23 @@ export default function AjouterArticle() {
       setImage(null);
     } catch (err) {
       const status = err?.response?.status;
+
       if (status === 401 || status === 403) {
         setMessage('⛔ Session invalide. Veuillez vous reconnecter.');
         navigate('/connexion-membre', { replace: true });
       } else {
         const srvMsg = err?.response?.data?.message || '';
+
         // refléter précisément les validations serveur si 400
         if (status === 400) {
-          if (/titre/i.test(srvMsg)) setTitleError(srvMsg);
-          if (/description/i.test(srvMsg)) setDescError(srvMsg);
+          if (/titre/i.test(srvMsg)) {
+            setTitleError(srvMsg);
+          }
+
+          if (/description/i.test(srvMsg)) {
+            setDescError(srvMsg);
+          }
+
           setMessage(
             srvMsg ||
               '❌ Données invalides (vérifiez le titre et la description).'
@@ -106,76 +123,108 @@ export default function AjouterArticle() {
   };
 
   return (
-    <div className="add-article">
-      <h2>Ajouter un article</h2>
+    <section className="add-article" aria-labelledby="add-article-title">
+      <h2 id="add-article-title">Ajouter un article</h2>
 
       <form
         onSubmit={onSubmit}
         noValidate
         aria-busy={submitting ? 'true' : 'false'}
-        encType="multipart/form-data">
+        encType="multipart/form-data"
+      >
         <label htmlFor="article-title">Titre</label>
         <input
           id="article-title"
+          name="title"
           className="article-title"
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
           aria-invalid={titleError ? 'true' : 'false'}
-          aria-describedby={titleError ? 'article-title-error' : undefined}
+          aria-describedby={
+            titleError
+              ? 'article-title-error'
+              : message
+              ? 'article-form-message'
+              : undefined
+          }
         />
+
         {titleError && (
           <p
             id="article-title-error"
-            role="status"
+            role="alert"
             aria-live="polite"
-            style={{ marginTop: 4 }}>
+            style={{ marginTop: 4 }}
+          >
             {titleError}
           </p>
         )}
+
         <label htmlFor="article-description">Description</label>
         <textarea
           id="article-description"
+          name="description"
           className="article-description"
           value={description}
           onChange={e => setDescription(e.target.value)}
           rows={6}
           required
           aria-invalid={descError ? 'true' : 'false'}
-          aria-describedby={descError ? 'article-description-error' : undefined}
+          aria-describedby={
+            descError
+              ? 'article-description-error'
+              : message
+              ? 'article-form-message'
+              : undefined
+          }
         />
+
         {descError && (
           <p
             id="article-description-error"
-            role="status"
+            role="alert"
             aria-live="polite"
-            style={{ marginTop: 4 }}>
+            style={{ marginTop: 4 }}
+          >
             {descError}
           </p>
         )}
+
         <label htmlFor="article-image">Image (optionnelle)</label>
         <input
           id="article-image"
+          name="image"
           className="article-image"
           type="file"
           accept="image/*"
           onChange={e => setImage(e.target.files?.[0] ?? null)}
+          aria-describedby="article-image-help"
         />
+        <p id="article-image-help">
+          Vous pouvez ajouter une image pour illustrer l’article.
+        </p>
 
         <button className="article-submit" type="submit" disabled={submitting}>
           {submitting ? 'Publication…' : '➕ Publier'}
         </button>
+
         <p aria-live="polite" role="status" className="sr-only">
           {submitting ? 'Publication en cours' : ''}
         </p>
       </form>
 
       {message && (
-        <p style={{ marginTop: 12 }} aria-live="polite" role="status">
+        <p
+          id="article-form-message"
+          style={{ marginTop: 12 }}
+          aria-live="polite"
+          role="status"
+        >
           {message}
         </p>
       )}
-    </div>
+    </section>
   );
 }

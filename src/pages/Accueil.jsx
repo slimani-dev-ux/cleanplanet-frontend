@@ -20,8 +20,7 @@ function Accueil() {
           {/* Navigation interne vers la liste publique des articles */}
           <Link to="/liste-articles">
             <button className="cta-button">Voir la liste des Articles</button>
-          </Link>
-          <br />
+          </Link>   
         </section>
       </div>
     </main>

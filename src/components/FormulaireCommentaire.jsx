@@ -11,6 +11,7 @@ function FormulaireCommentaire({
 }) {
   const [content, setContent] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
 
   // Choix du callback effectif (nouveau nom prioritaire)
@@ -20,10 +21,12 @@ function FormulaireCommentaire({
   const handleSubmit = async e => {
     e.preventDefault();
     setMessage('');
+    setError('');
 
     const trimmed = String(content || '').trim();
+
     if (!trimmed) {
-      setMessage('⚠️ Veuillez entrer un commentaire.');
+      setError('⚠️ Veuillez entrer un commentaire.');
       return;
     }
 
@@ -31,30 +34,40 @@ function FormulaireCommentaire({
       setSending(true);
       await api.post(`/articles/${articleId}/comments`, { content: trimmed });
       setContent('');
+      setError('');
       setMessage('✅ Commentaire publié !');
       handleAfterAdd?.();
     } catch (error) {
       console.error('❌ Erreur envoi commentaire :', error);
-      setMessage('❌ Erreur lors de l’envoi.');
+      setMessage('');
+      setError('❌ Erreur lors de l’envoi.');
     } finally {
       setSending(false);
     }
   };
+
   return (
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="comment-form">
+      className="comment-form"
+      aria-busy={sending ? 'true' : 'false'}>
       <label htmlFor="commentaire">Votre commentaire</label>
+
       <textarea
         id="commentaire"
+        name="commentaire"
         className="comment-textarea"
-        rows={5} // ← hauteur de base (augmentable)
+        rows={5}
         value={content}
         onChange={e => setContent(e.target.value)}
         placeholder="✍️ Écris ton commentaire…"
         required
+        aria-required="true"
+        aria-invalid={error ? 'true' : 'false'}
+        aria-describedby={error ? 'commentaire-error' : undefined}
       />
+
       <button
         type="submit"
         disabled={sending || isEmpty}
@@ -72,11 +85,25 @@ function FormulaireCommentaire({
         )}
       </button>
 
-      <p aria-live="polite" className="sr-only">
+      <p aria-live="polite" role="status" className="sr-only">
         {sending ? 'Publication du commentaire en cours' : ''}
       </p>
 
-      {message && <p className="status">{message}</p>}
+      {error && (
+        <p
+          id="commentaire-error"
+          className="status"
+          role="alert"
+          aria-live="polite">
+          {error}
+        </p>
+      )}
+
+      {message && (
+        <p className="status" role="status" aria-live="polite">
+          {message}
+        </p>
+      )}
     </form>
   );
 }

@@ -15,12 +15,13 @@ function ListeCommentaires({ articleId }) {
       .get(`/articles/${articleId}/comments`)
       .then(response => {
         if (!mounted) return;
+
         const list = Array.isArray(response.data) ? response.data : [];
         setCommentaires(list);
         setStatusMsg(
           list.length === 0
             ? 'Aucun commentaire pour cet article.'
-            : `${list.length} commentaire${list.length > 1 ? 's' : ''} chargé${list.length > 1 ? 's' : ''}.`
+            : `${list.length} commentaire${list.length > 1 ? 's' : ''} chargé${list.length > 1 ? 's' : ''}.`,
         );
       })
       .catch(() => {
@@ -40,7 +41,6 @@ function ListeCommentaires({ articleId }) {
         <span aria-hidden="true">💬</span> Commentaires
       </h3>
 
-      {/* Zone live pour lecteurs d’écran (et visible si tu veux) */}
       <p className="sr-only" role="status" aria-live="polite">
         {statusMsg}
       </p>
@@ -49,27 +49,38 @@ function ListeCommentaires({ articleId }) {
         <p className="no-comments">Aucun commentaire pour cet article.</p>
       ) : (
         <ul className="with-comments" aria-label="Liste des commentaires">
-          {commentaires.map((comment) => {
-            const nomAuteur = comment.user_name || comment.author || 'Utilisateur inconnu';
+          {commentaires.map(comment => {
+            const nomAuteur =
+              comment.user_name || comment.author || 'Utilisateur inconnu';
             const texteContenu = comment.content ?? comment.body ?? '';
-            const isoDate = comment.created_at ? new Date(comment.created_at).toISOString() : '';
-            const dateLisible = comment.created_at
-              ? new Date(comment.created_at).toLocaleString()
-              : '';
+
+            const dateObjet = comment.created_at
+              ? new Date(comment.created_at)
+              : null;
+
+            const dateValide =
+              dateObjet instanceof Date && !Number.isNaN(dateObjet.getTime());
+
+            const isoDate = dateValide ? dateObjet.toISOString() : '';
+            const dateLisible = dateValide ? dateObjet.toLocaleString() : '';
 
             return (
               <li key={comment.comment_id}>
-                <p>
-                  <span aria-hidden="true">🧑</span>{' '}
-                  <strong>{nomAuteur}</strong> a dit :
-                </p>
-                <p>{texteContenu}</p>
-                {isoDate && (
+                <article aria-label={`Commentaire de ${nomAuteur}`}>
                   <p>
-                    <span aria-hidden="true">🕒</span>{' '}
-                    <time dateTime={isoDate}>{dateLisible}</time>
+                    <span aria-hidden="true">🧑</span>{' '}
+                    <strong>{nomAuteur}</strong> a dit :
                   </p>
-                )}
+
+                  <p>{texteContenu}</p>
+
+                  {isoDate && (
+                    <p>
+                      <span aria-hidden="true">🕒</span>{' '}
+                      <time dateTime={isoDate}>{dateLisible}</time>
+                    </p>
+                  )}
+                </article>
               </li>
             );
           })}

@@ -32,6 +32,7 @@ function DetailArticle() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setMessage('');
 
     (async () => {
       try {
@@ -55,9 +56,13 @@ function DetailArticle() {
           setComments(Array.isArray(comRes.data) ? comRes.data : []);
         }
       } catch {
-        if (mounted) setMessage('❌ Erreur de chargement');
+        if (mounted) {
+          setMessage('❌ Erreur de chargement');
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     })();
 
@@ -75,10 +80,11 @@ function DetailArticle() {
 
     try {
       setSending(true);
+
       await api.post(
         `/articles/${id}/comments`,
         { content: newComment },
-        { validateStatus: s => s >= 200 && s < 300 }
+        { validateStatus: s => s >= 200 && s < 300 },
       );
 
       const res = await api.get(`/articles/${id}/comments`, {
@@ -96,53 +102,77 @@ function DetailArticle() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <main style={{ padding: '20px' }}>
       {loading ? (
-        <p role="status" aria-busy="true">
+        <p role="status" aria-busy="true" aria-live="polite">
           Chargement...
         </p>
       ) : article ? (
         <>
-          <h2>{article.title}</h2>
-
-          {/* ✅ Sauts de ligne respectés */}
-          <p style={{ whiteSpace: 'pre-wrap' }}>{article.description}</p>
-
-          <p>
-            <strong>Auteur :</strong> {article.author_name}
-          </p>
-
-          {article.image && (
-            <img
-              src={`http://localhost:5000/uploads/${article.image}`}
-              alt={`Illustration : ${article.title}`}
-              style={{ width: '300px', margin: '10px 0' }}
-            />
-          )}
-
-          <h3>💬 Commentaires</h3>
-          {comments.length > 0 ? (
-            comments.map(c => (
-              <p key={c.comment_id}>
-                <strong>{c.user_name || '👤 Anonyme'}:</strong> {c.content}
+          <article aria-labelledby="article-title">
+            <header>
+              <h2 id="article-title">{article.title}</h2>
+              <p>
+                <strong>Auteur :</strong> {article.author_name}
               </p>
-            ))
-          ) : (
-            <p>Aucun commentaire pour le moment.</p>
-          )}
+            </header>
 
-          {/* ✅ Formulaire visible uniquement pour les utilisateurs standards */}
+            <section aria-labelledby="article-content-title">
+              <h3 id="article-content-title" className="sr-only">
+                Contenu de l’article
+              </h3>
+
+              <p style={{ whiteSpace: 'pre-wrap' }}>{article.description}</p>
+
+              {article.image && (
+                <img
+                  src={`http://localhost:5000/uploads/${article.image}`}
+                  alt={`Illustration de l’article ${article.title}`}
+                  style={{ width: '300px', margin: '10px 0' }}
+                />
+              )}
+            </section>
+          </article>
+
+          <section
+            aria-labelledby="comments-title"
+            style={{ marginTop: '20px' }}>
+            <h3 id="comments-title">💬 Commentaires</h3>
+
+            {comments.length > 0 ? (
+              <ul style={{ paddingLeft: '20px' }}>
+                {comments.map(c => (
+                  <li key={c.comment_id}>
+                    <p>
+                      <strong>{c.user_name || '👤 Anonyme'} :</strong>{' '}
+                      {c.content}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Aucun commentaire pour le moment.</p>
+            )}
+          </section>
+
           {role === 'user' && (
-            <div style={{ marginTop: '15px' }}>
+            <section
+              aria-labelledby="comment-form-title"
+              style={{ marginTop: '15px' }}>
+              <h3 id="comment-form-title">Ajouter un commentaire</h3>
+
               <label htmlFor="new-comment">Écrire un commentaire</label>
               <textarea
                 id="new-comment"
+                name="newComment"
                 placeholder="Écrire un commentaire..."
                 value={newComment}
                 onChange={e => setNewComment(e.target.value)}
                 style={{ width: '100%', padding: '8px', marginBottom: '8px' }}
                 aria-required="true"
+                aria-describedby={message ? 'comment-message' : undefined}
               />
+
               <button
                 type="button"
                 onClick={handleComment}
@@ -153,11 +183,15 @@ function DetailArticle() {
               <p aria-live="polite" role="status" className="sr-only">
                 {sending ? 'Envoi du commentaire en cours' : ''}
               </p>
-            </div>
+            </section>
           )}
 
           {message && (
-            <p style={{ marginTop: '10px' }} aria-live="polite" role="status">
+            <p
+              id="comment-message"
+              style={{ marginTop: '10px' }}
+              aria-live="polite"
+              role="status">
               {message}
             </p>
           )}
@@ -167,7 +201,7 @@ function DetailArticle() {
           {message || 'Aucun contenu.'}
         </p>
       )}
-    </div>
+    </main>
   );
 }
 

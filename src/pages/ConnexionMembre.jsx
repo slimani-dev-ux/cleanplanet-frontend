@@ -13,6 +13,7 @@ function ConnexionMembre() {
   const handleSubmit = async event => {
     event.preventDefault();
     if (loading) return;
+
     setMessage('');
     setLoading(true);
 
@@ -30,22 +31,18 @@ function ConnexionMembre() {
       // 2) Lire la session via le cookie
       const { data: me } = await api.get('/auth/me', {
         validateStatus: s => (s >= 200 && s < 300) || s === 401,
-      }); // { role, member_id, ... }
-      const role = String(me.role || '').toLowerCase();
+      });
+
+      const role = String(me?.role || '').toLowerCase();
 
       // 3) Rediriger selon le rôle
-      if (role === 'member') navigate('/profil-membre', { replace: true });
-      else if (role === 'admin') navigate('/profil-admin', { replace: true });
-      else navigate('/profil-utilisateur', { replace: true });
-
-      // (facultatif) Nettoyage d’anciens restes de stockage de versions précédentes
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('token_membre');
-        localStorage.removeItem('member');
-        sessionStorage.clear();
-      } catch {}
+      if (role === 'member') {
+        navigate('/profil-membre', { replace: true });
+      } else if (role === 'admin') {
+        navigate('/profil-admin', { replace: true });
+      } else {
+        navigate('/profil-utilisateur', { replace: true });
+      }
     } catch (err) {
       setMessage(
         err?.response?.data?.message || '❌ Email ou mot de passe incorrect'
@@ -56,16 +53,18 @@ function ConnexionMembre() {
   };
 
   return (
-    <div className="member-login">
-      <h2>🔐 Connexion Membre</h2>
+    <section className="member-login" aria-labelledby="member-login-title">
+      <h2 id="member-login-title">🔐 Connexion Membre</h2>
 
       <form
         onSubmit={handleSubmit}
         noValidate
-        aria-busy={loading ? 'true' : 'false'}>
+        aria-busy={loading ? 'true' : 'false'}
+      >
         <label htmlFor="login-email">Email</label>
         <input
           id="login-email"
+          name="email"
           type="email"
           placeholder="Email"
           value={email}
@@ -73,9 +72,11 @@ function ConnexionMembre() {
           autoComplete="email"
           required
         />
+
         <label htmlFor="login-password">Mot de passe</label>
         <input
           id="login-password"
+          name="password"
           type="password"
           placeholder="Mot de passe"
           value={motDePasse}
@@ -83,6 +84,7 @@ function ConnexionMembre() {
           autoComplete="current-password"
           required
         />
+
         <button type="submit" disabled={loading}>
           {loading ? 'Connexion…' : 'Se connecter'}
         </button>
@@ -93,7 +95,7 @@ function ConnexionMembre() {
           {message}
         </p>
       )}
-    </div>
+    </section>
   );
 }
 

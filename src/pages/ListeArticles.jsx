@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Trash2, MessageSquareText, X } from 'lucide-react';
 import FormulaireCommentaire from '../components/FormulaireCommentaire';
+import Modal from '../components/Modal';
 
 function ListeArticles(props) {
   const location = useLocation();
@@ -17,8 +18,9 @@ function ListeArticles(props) {
   const [message, setMessage] = useState('');
   const [commentsByArticleId, setCommentsByArticleId] = useState({});
   const [me, setMe] = useState(null);
-  // toggle du formulaire par article
   const [expanded, setExpanded] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState(null);
 
   const isAdmin = useMemo(() => me?.role === 'admin', [me]);
   const isUserStandard = useMemo(() => me?.role === 'user', [me]);
@@ -29,18 +31,24 @@ function ListeArticles(props) {
       setMe(null);
       return;
     }
+
     let mounted = true;
+
     (async () => {
       try {
         const { data } = await api.get('/auth/me', {
           validateStatus: s => (s >= 200 && s < 300) || s === 401,
         });
+
         if (!mounted) return;
         setMe(data || null);
       } catch {
-        if (mounted) setMe(null);
+        if (mounted) {
+          setMe(null);
+        }
       }
     })();
+
     return () => {
       mounted = false;
     };
@@ -49,31 +57,40 @@ function ListeArticles(props) {
   // 2) Charger les articles puis leurs commentaires
   useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
         const { data: articlesData } = await api.get('/articles');
+
         if (!mounted) return;
         setArticles(articlesData);
 
         const nextIndex = {};
+
         await Promise.all(
           (articlesData || []).map(async article => {
             try {
               const { data } = await api.get(
-                `/articles/${article.article_id}/comments`
+                `/articles/${article.article_id}/comments`,
               );
               nextIndex[article.article_id] = data;
             } catch {
               nextIndex[article.article_id] = [];
             }
-          })
+          }),
         );
-        if (mounted) setCommentsByArticleId(nextIndex);
+
+        if (mounted) {
+          setCommentsByArticleId(nextIndex);
+        }
       } catch (error) {
         console.error('Erreur chargement articles :', error);
-        if (mounted) setMessage('Erreur serveur');
+        if (mounted) {
+          setMessage('Erreur serveur');
+        }
       }
     })();
+
     return () => {
       mounted = false;
     };
@@ -90,13 +107,31 @@ function ListeArticles(props) {
   }
 
   const handleDeleteArticle = async articleId => {
-    if (!window.confirm('Supprimer cet article ?')) return;
+    setArticleToDelete(articleId);
+    setIsModalOpen(true);
+  };
+
+  const confirmDeleteArticle = async () => {
+    if (!articleToDelete) return;
+
     try {
-      await api.delete(`/articles/${articleId}`);
-      setArticles(prev => prev.filter(a => a.article_id !== articleId));
+      await api.delete(`/articles/${articleToDelete}`);
+      setArticles(prev =>
+        prev.filter(article => article.article_id !== articleToDelete),
+      );
+      setMessage('✅ Article supprimé avec succès.');
     } catch (error) {
       console.error('Erreur suppression :', error);
+      setMessage('❌ Erreur lors de la suppression de l’article.');
+    } finally {
+      setIsModalOpen(false);
+      setArticleToDelete(null);
     }
+  };
+
+  const cancelDeleteArticle = () => {
+    setIsModalOpen(false);
+    setArticleToDelete(null);
   };
 
   const toggleCommentForm = articleId => {
@@ -106,11 +141,13 @@ function ListeArticles(props) {
   // --- rendu commentaires ---
   const renderComments = articleId => {
     const comments = commentsByArticleId[articleId] || [];
+
     if (comments.length === 0) {
       return (
         <div className="no-comments">Aucun commentaire pour cet article.</div>
       );
     }
+
     return (
       <div className="with-comments">
         <strong>Commentaires :</strong>
@@ -126,7 +163,7 @@ function ListeArticles(props) {
   };
 
   return (
-    <div className="articles-section">
+    <section className="articles-section" aria-labelledby="articles-title">
       {showBackToProfile && (
         <button
           type="button"
@@ -137,10 +174,11 @@ function ListeArticles(props) {
           ← Retour au profil
         </button>
       )}
-      <h2>Liste des Articles</h2>
+
+      <h2 id="articles-title">Liste des Articles</h2>
 
       {message && (
-        <p className="status" aria-live="polite">
+        <p className="status" aria-live="polite" role="status">
           {message}
         </p>
       )}
@@ -149,84 +187,91 @@ function ListeArticles(props) {
         <ul className="articles-list">
           {articles.map(article => (
             <li key={article.article_id} className="articles-item">
-              <h3>{article.title}</h3>
+              <article aria-labelledby={`article-title-${article.article_id}`}>
+                <h3 id={`article-title-${article.article_id}`}>
+                  {article.title}
+                </h3>
 
-              {/* ✅ Respect des retours à la ligne */}
-              <p
-                className="article-description"
-                style={{ whiteSpace: 'pre-wrap' }}>
-                {article.description}
-              </p>
+                <p
+                  className="article-description"
+                  style={{ whiteSpace: 'pre-wrap' }}>
+                  {article.description}
+                </p>
 
-              <p>
-                <strong>Auteur :</strong> {article.author_name}
-              </p>
+                <p>
+                  <strong>Auteur :</strong> {article.author_name}
+                </p>
 
-              {article.image && (
-                <img
-                  className="article-image"
-                  src={`http://localhost:5000/uploads/${article.image}`}
-                  alt={`Illustration : ${article.title}`}
-                />
-              )}
-
-              <small className="meta">
-                🕒 <strong>Publié le :</strong>{' '}
-                {new Date(article.created_at).toLocaleString('fr-FR')}
-              </small>
-
-              {renderComments(article.article_id)}
-
-              <div className="actions">
-                {isAdmin && !isPublicPage && (
-                  <button
-                    className="remove"
-                    onClick={() => handleDeleteArticle(article.article_id)}
-                    aria-label="Supprimer l’article"
-                    title="Supprimer l’article">
-                    <Trash2 size={18} aria-hidden />
-                    <span className="sr-only">Supprimer</span>
-                  </button>
+                {article.image && (
+                  <img
+                    className="article-image"
+                    src={`http://localhost:5000/uploads/${article.image}`}
+                    alt={`Illustration de l’article ${article.title}`}
+                  />
                 )}
 
-                {isUserStandard && !isPublicPage && (
-                  <button
-                    className="comment"
-                    onClick={() => toggleCommentForm(article.article_id)}
-                    aria-expanded={!!expanded[article.article_id]}
-                    aria-controls={`cform-${article.article_id}`}
-                    aria-label={
-                      expanded[article.article_id]
-                        ? 'Fermer le formulaire de commentaire'
-                        : 'Ouvrir le formulaire de commentaire'
-                    }
-                    title={
-                      expanded[article.article_id] ? 'Fermer' : 'Commenter'
-                    }>
-                    {expanded[article.article_id] ? (
-                      <X size={18} aria-hidden />
-                    ) : (
-                      <MessageSquareText size={18} aria-hidden />
-                    )}
-                    <span className="sr-only">
-                      {expanded[article.article_id] ? 'Fermer' : 'Commenter'}
-                    </span>
-                  </button>
-                )}
-              </div>
+                <small className="meta">
+                  🕒 <strong>Publié le :</strong>{' '}
+                  {new Date(article.created_at).toLocaleString('fr-FR')}
+                </small>
 
-              {expanded[article.article_id] &&
-                isUserStandard &&
-                !isPublicPage && (
-                  <div
-                    id={`cform-${article.article_id}`}
-                    className="comment-form">
-                    <FormulaireCommentaire
-                      articleId={article.article_id}
-                      onCommentAdded={() => refreshComments(article.article_id)}
-                    />
-                  </div>
-                )}
+                {renderComments(article.article_id)}
+
+                <div className="actions">
+                  {isAdmin && !isPublicPage && (
+                    <button
+                      type="button"
+                      className="remove"
+                      onClick={() => handleDeleteArticle(article.article_id)}
+                      aria-label="Supprimer l’article"
+                      title="Supprimer l’article">
+                      <Trash2 size={18} aria-hidden />
+                      <span className="sr-only">Supprimer</span>
+                    </button>
+                  )}
+
+                  {isUserStandard && !isPublicPage && (
+                    <button
+                      type="button"
+                      className="comment"
+                      onClick={() => toggleCommentForm(article.article_id)}
+                      aria-expanded={!!expanded[article.article_id]}
+                      aria-controls={`cform-${article.article_id}`}
+                      aria-label={
+                        expanded[article.article_id]
+                          ? 'Fermer le formulaire de commentaire'
+                          : 'Ouvrir le formulaire de commentaire'
+                      }
+                      title={
+                        expanded[article.article_id] ? 'Fermer' : 'Commenter'
+                      }>
+                      {expanded[article.article_id] ? (
+                        <X size={18} aria-hidden />
+                      ) : (
+                        <MessageSquareText size={18} aria-hidden />
+                      )}
+                      <span className="sr-only">
+                        {expanded[article.article_id] ? 'Fermer' : 'Commenter'}
+                      </span>
+                    </button>
+                  )}
+                </div>
+
+                {expanded[article.article_id] &&
+                  isUserStandard &&
+                  !isPublicPage && (
+                    <div
+                      id={`cform-${article.article_id}`}
+                      className="comment-form">
+                      <FormulaireCommentaire
+                        articleId={article.article_id}
+                        onCommentAdded={() =>
+                          refreshComments(article.article_id)
+                        }
+                      />
+                    </div>
+                  )}
+              </article>
 
               <hr className="divider" />
             </li>
@@ -235,7 +280,17 @@ function ListeArticles(props) {
       ) : (
         !message && <p>Aucun article trouvé.</p>
       )}
-    </div>
+
+      <Modal
+        open={isModalOpen}
+        title="Confirmer la suppression"
+        onCancel={cancelDeleteArticle}
+        onConfirm={confirmDeleteArticle}
+        confirmText="Supprimer"
+        cancelText="Annuler">
+        Cette action supprimera définitivement l’article sélectionné.
+      </Modal>
+    </section>
   );
 }
 

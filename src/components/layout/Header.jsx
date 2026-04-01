@@ -20,8 +20,6 @@ function Header() {
       const role = String(data?.role || '').toLowerCase();
       const authed = !!role;
 
-      // Cette fonction permet de mettre à jour les flags de session (isAuthenticated, isAdmin, isMember) d’après la réponse de /auth/me, sinon réinitialise tout à faux en cas d’échec.
-
       setSession({
         isAuthenticated: authed,
         isAdmin: authed && (role === 'admin' || data.is_admin === true),
@@ -51,21 +49,12 @@ function Header() {
 
   const handleLogout = async e => {
     e?.preventDefault?.();
+
     try {
       await api.post('/auth/logout');
     } catch {}
 
-    // Nettoyage "héritage" éventuel
-    localStorage.removeItem('token');
-    localStorage.removeItem('token_membre');
-    localStorage.removeItem('user');
-    localStorage.removeItem('membre');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('token_membre');
-    sessionStorage.removeItem('user');
-    sessionStorage.removeItem('membre');
-
-    // Met immédiatement l'UI à jour (optimiste)
+    // Met immédiatement l'UI à jour
     setSession({ isAuthenticated: false, isAdmin: false, isMember: false });
 
     // Informe le reste de l’app + resynchronise en lisant /auth/me
@@ -86,7 +75,7 @@ function Header() {
 
         <nav className="nav-links" aria-label="Navigation principale">
           <Link to="/">Accueil</Link>
-          {/* Admin → envoie un state { mode: 'admin' } en allant vers Articles */}
+
           {session.isAdmin ? (
             <Link to="/liste-articles" state={{ mode: 'admin' }}>
               Articles
@@ -100,16 +89,14 @@ function Header() {
               {session.isAdmin && <Link to="/inscription">inscription</Link>}
 
               {session.isMember && <Link to="/profil-membre">Mon profil</Link>}
+
               {!session.isMember && !session.isAdmin && (
                 <Link to="/profil-utilisateur">Mon profil</Link>
               )}
+
               <Link to="/" onClick={handleLogout} className="logout-link">
                 Déconnexion
               </Link>
-
-              {/* <Link to="/" onClick={handleLogout}>
-                Déconnexion
-              </Link> */}
             </>
           ) : (
             <>

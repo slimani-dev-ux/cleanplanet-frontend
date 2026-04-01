@@ -12,6 +12,8 @@ function ConnexionUtilisateur() {
 
   const handleSubmit = async event => {
     event.preventDefault();
+    if (loading) return;
+
     setMessage('');
     setLoading(true);
 
@@ -22,23 +24,20 @@ function ConnexionUtilisateur() {
         password: motDePasse,
       });
 
-      // 2) récupérer l’info de session (facultatif mais pratique pour la redirection)
-      const { data: me } = await api.get('/auth/me'); // { role, is_admin, ... }
+      // 2) récupérer l’info de session
+      const { data: me } = await api.get('/auth/me');
 
-      // 3) notifier le Header (et autres) que la session a changé
+      // 3) notifier le Header que la session a changé
       window.dispatchEvent(new Event('auth:updated'));
 
       // 4) rediriger selon le rôle
-      const role = String(me.role || '').toLowerCase();
-      if (role === 'admin') navigate('/profil-admin');
-      else navigate('/profil-utilisateur');
+      const role = String(me?.role || '').toLowerCase();
 
-      // nettoyage d’anciens restes
-      localStorage.removeItem('token');
-      localStorage.removeItem('token_membre');
-      localStorage.removeItem('user');
-      localStorage.removeItem('member');
-      sessionStorage.clear();
+      if (role === 'admin') {
+        navigate('/profil-admin');
+      } else {
+        navigate('/profil-utilisateur');
+      }
     } catch (err) {
       setMessage(
         err?.response?.data?.message || '❌ Email ou mot de passe incorrect'
@@ -49,11 +48,15 @@ function ConnexionUtilisateur() {
   };
 
   return (
-    <div className="user-login">
-      <h2>🔐 Connexion Utilisateur</h2>
-  
+    <section className="user-login" aria-labelledby="user-login-title">
+      <h2 id="user-login-title">🔐 Connexion Utilisateur</h2>
 
-      <form autoComplete="on" onSubmit={handleSubmit} noValidate>
+      <form
+        autoComplete="on"
+        onSubmit={handleSubmit}
+        noValidate
+        aria-busy={loading ? 'true' : 'false'}
+      >
         <label htmlFor="login-email">Email</label>
         <input
           id="login-email"
@@ -90,11 +93,13 @@ function ConnexionUtilisateur() {
             marginTop: 12,
             color: message.startsWith('❌') ? 'red' : 'green',
           }}
-          aria-live="polite">
+          aria-live="polite"
+          role="status"
+        >
           {message}
         </p>
       )}
-    </div>
+    </section>
   );
 }
 

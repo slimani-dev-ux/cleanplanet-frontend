@@ -10,6 +10,7 @@
 * {
   box-sizing: border-box;
 }
+
 html {
   font-size: 62.5%;
 }
@@ -21,7 +22,7 @@ body {
 }
 main {
   background: #f4f4f4;
-  padding: 1rem 0;
+  padding: 2rem 0;
 }
 
 /* ===============================
@@ -37,12 +38,17 @@ main {
 }
 
 /* Gabarit des formulaires */
-form,
-form button {
+form {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
+/* form,
+form button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+} */
 
 /* Icônes & spinner */
 .icon {
@@ -206,7 +212,7 @@ form button {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   gap: 1.2rem;
   padding: 1.2rem;
@@ -242,7 +248,9 @@ form button {
   padding: 1rem 1.2rem;
   border-radius: 0.8rem;
   background: rgba(255, 255, 255, 0.011);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 .nav-links a:hover {
   color: #90ee90;
@@ -263,7 +271,7 @@ form button {
 }
 .articles-section,
 .modify-article {
-  padding-right: 2.3rem;
+  padding: 2rem 2.3rem 0 0;
 }
 .articles-section h2 {
   margin-left: 2.3rem;
@@ -274,9 +282,6 @@ form button {
   word-break: break-word;
 }
 
-.articles-section button {
-  margin: 2rem 0 0 2rem;
-}
 .articles-section p {
   margin-bottom: 1rem;
   white-space: pre-line;
@@ -350,7 +355,7 @@ form button {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bolder;
-  margin: 2rem 0 0 2rem;
+  margin: 0 0 1.5rem 2rem;
 }
 
 .retour-profil-btn:hover {
@@ -398,7 +403,7 @@ form button {
 .users-section .users-item,
 .members-section .members-item,
 .organisations-section .organisations-item {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 .users-item button,
 .members-item button,
@@ -548,26 +553,34 @@ form.comment-form,
   text-align: center;
 }
 
-/* Stabilise la hauteur du bloc contact pour éviter les variations */
+/* Bloc formulaire */
 .contact-form {
-  min-height: 24rem;
-  flex: 1;
+  width: 100%;
+  min-height: 25rem;
   min-width: 25rem;
+  flex: 1;
 }
+
 .contact-form input,
 .contact-form textarea {
   width: 100%;
   margin: 0.5rem 0;
   padding: 1rem;
-  border-radius: 0.5rem;
   border: none;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
 }
-.contact-form button {
+
+.contact-form .btn-primary {
+  width: 100%;
+  margin-top: 1rem;
   padding: 1rem 2rem;
-  background: #0af;
   border: none;
-  color: #fff;
   border-radius: 0.5rem;
+}
+
+/* Messages du formulaire */
+.contact-form .form-status {
   margin-top: 1rem;
 }
 
@@ -579,18 +592,23 @@ form.comment-form,
   font-size: 1.5em;
   margin-top: 3rem;
 }
+
 .social-icons a i {
   transition: opacity 0.3s ease;
 }
+
 .social-icons a:nth-child(1) i {
   color: #1da1f2;
-} /* Twitter */
+}
+
 .social-icons a:nth-child(2) i {
   color: #1877f2;
-} /* Facebook */
+}
+
 .social-icons a:nth-child(3) i {
   color: #e1306c;
-} /* Instagram */
+}
+
 .social-icons a:hover i {
   opacity: 0.7;
 }
@@ -599,13 +617,13 @@ form.comment-form,
    8) PAGES D’AUTH (inscription / connexion)
    ========================================= */
 :is(
-    .register-page,
-    .login-page,
-    .user-login,
-    .modify-user-profil,
-    .member-login,
-    .modify-member-profil
-  ) {
+  .register-page,
+  .login-page,
+  .user-login,
+  .modify-user-profil,
+  .member-login,
+  .modify-member-profil
+) {
   max-width: 72rem;
   margin: 3rem auto;
   padding: 1.6rem;
@@ -668,8 +686,53 @@ form.comment-form,
   width: 100%;
 }
 
+/* =========================
+   MODALE
+   ========================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-card {
+  width: min(100%, 48rem);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  color: #111;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+}
+
+.modal-body {
+  margin-bottom: 1.6rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.modal-actions .btn {
+  width: auto;
+  max-width: none;
+}
 /* =================
-   9) MEDIA QUERIES
+    9) MEDIA QUERIES
    ================= */
 
 /* Small phones (≤375px) */
@@ -728,10 +791,11 @@ form.comment-form,
   .intro h1 {
     font-size: 2.5em;
   }
-  /* form button {
-    width: auto;
-    margin: 0.5rem;
-  } */
+  .contact-form .btn-primary {
+    width: 18rem;
+    display: block;
+    margin: 1rem auto 0;
+  }
 
   .articles-section .articles-list,
   .member-profile-section .articles-list {
